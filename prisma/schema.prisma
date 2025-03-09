@@ -1,0 +1,29 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  email             String   @unique
+  password          String
+  nom               String
+  prenom            String
+  role              Role     @default(CLIENT)
+  isEmailVerified   Boolean  @default(false)
+  verificationCode  String?
+  verificationExpires DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum Role {
+  CLIENT
+  MECANICIEN
+  MANAGER
+} 
