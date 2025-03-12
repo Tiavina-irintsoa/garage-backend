@@ -1,7 +1,37 @@
 const express = require("express");
 const app = express();
 const port = 3000;
+const cors = require("cors");
 
+// Configuration CORS avec plus de flexibilité
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.FRONT_API || "http://localhost:4200",
+      "http://localhost:4200",
+    ];
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Accept",
+    "Origin",
+    "X-Requested-With",
+  ],
+  exposedHeaders: ["Authorization"],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+
+// Appliquer CORS avant tout autre middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 require("dotenv").config();
 
@@ -10,6 +40,7 @@ const RegisterController = require("./src/components/controllers/registerControl
 const LoginController = require("./src/components/controllers/loginController");
 const ManagerController = require("./src/components/controllers/managerController");
 const VerificationController = require("./src/components/controllers/verificationController");
+const UserController = require("./src/components/controllers/userController");
 
 // Middlewares
 const {
@@ -39,6 +70,9 @@ app.post(
   verificationValidation,
   VerificationController.verifyEmail
 );
+
+// Routes protégées
+app.get("/api/auth/users/:userId", authMiddleware, UserController.getUserById);
 
 // Route protégée exemple
 app.get("/api/protected", authMiddleware, (req, res) => {
