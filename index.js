@@ -94,7 +94,7 @@ app.delete(
 
 // Routes des demandes de service
 app.post("/api/demandes", authMiddleware, DemandeController.createDemande);
-app.get("/api/demandes/:id", authMiddleware, DemandeController.getDemandeById);
+// app.get("/api/demandes/:id", authMiddleware, DemandeController.getDemandeById);
 app.get(
   "/api/demandes/user",
   authMiddleware,
@@ -134,6 +134,7 @@ app.delete(
   authMiddleware,
   TypeVehiculeController.deleteTypeVehicule
 );
+app.get("/api/marques/:marqueId/modeles", MarqueController.getModelesByMarqueId);
 
 // Route de status
 app.get("/api/status", async (req, res) => {

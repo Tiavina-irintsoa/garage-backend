@@ -57,6 +57,25 @@ class MarqueService {
       throw error;
     }
   }
+
+  static async getModelesByMarqueId(marqueId) {
+    try {
+      const marque = await prisma.marque.findUnique({
+        where: { id: marqueId },
+        include: {
+          modeles: true,
+        },
+      });
+
+      if (!marque) {
+        throw new Error("Marque non trouvée");
+      }
+
+      return marque.modeles;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = MarqueService;
