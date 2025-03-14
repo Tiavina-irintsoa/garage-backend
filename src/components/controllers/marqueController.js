@@ -62,6 +62,27 @@ class MarqueController {
       return res.status(500).json(ResponseJson.error(error.message, 500));
     }
   }
+
+  static async getModelesByMarqueId(req, res) {
+    try {
+      const marqueId = req.params.marqueId;
+      const modeles = await MarqueService.getModelesByMarqueId(marqueId);
+
+      return res.status(200).json(
+        ResponseJson.success({
+          modeles: modeles.map((modele) => ({
+            id: modele.id,
+            libelle: modele.libelle,
+          })),
+        })
+      );
+    } catch (error) {
+      if (error.message === "Marque non trouvée") {
+        return res.status(404).json(ResponseJson.error(error.message, 404));
+      }
+      return res.status(500).json(ResponseJson.error(error.message, 500));
+    }
+  }
 }
 
 module.exports = MarqueController;

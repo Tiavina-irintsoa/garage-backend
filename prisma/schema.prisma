@@ -28,6 +28,8 @@ model Service {
   titre       String
   description String
   icone       String
+  cout_base   Float
+  temps_base  Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -77,7 +79,12 @@ model DemandeService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   id_personne   String        @db.ObjectId
   vehicule      Json
+  services      Json[]
+  estimation    Json
+  description   String?
+  date_rdv      DateTime     // Date du rendez-vous
+  heure_rdv     String       // Heure du rendez-vous au format HH:mm
   dateCreation  DateTime      @default(now())
   statut        StatutDemande @default(EN_ATTENTE)
   user          User          @relation(fields: [id_personne], references: [id])
-} 
+}

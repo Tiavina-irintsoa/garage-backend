@@ -2,31 +2,34 @@ const prisma = require("../utils/prisma");
 const Modele = require("../models/modele");
 
 class ModeleService {
-  static async createModele(libelle, marqueId) {
+  static async create(modeleData, prismaClient = prisma) {
     try {
-      const modele = await prisma.modele.create({
-        data: { libelle, marqueId },
+      let modele = await prismaClient.modele.findFirst({
+        where: {
+          AND: [
+            { libelle: modeleData.libelle },
+            { marqueId: modeleData.marqueId },
+          ],
+        },
       });
+
+      // Si le modèle n'existe pas, le créer
+      if (!modele) {
+        modele = await prismaClient.modele.create({
+          data: {
+            libelle: modeleData.libelle,
+            marqueId: modeleData.marqueId,
+          },
+        });
+      }
+
       return Modele.fromJSON(modele);
     } catch (error) {
       throw error;
     }
   }
 
-  static async getAllModeles() {
-    try {
-      const modeles = await prisma.modele.findMany({
-        include: {
-          marque: true,
-        },
-      });
-      return modeles.map((modele) => Modele.fromJSON(modele));
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  static async getModeleById(id) {
+  static async getById(id) {
     try {
       const modele = await prisma.modele.findUnique({
         where: { id },
@@ -34,10 +37,41 @@ class ModeleService {
           marque: true,
         },
       });
+
       if (!modele) {
         throw new Error("Modèle non trouvé");
       }
+
       return Modele.fromJSON(modele);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getByMarque(marqueId) {
+    try {
+      const modeles = await prisma.modele.findMany({
+        where: { marqueId },
+        include: {
+          marque: true,
+        },
+      });
+
+      return modeles.map((modele) => Modele.fromJSON(modele));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getAll() {
+    try {
+      const modeles = await prisma.modele.findMany({
+        include: {
+          marque: true,
+        },
+      });
+
+      return modeles.map((modele) => Modele.fromJSON(modele));
     } catch (error) {
       throw error;
     }
@@ -60,20 +94,6 @@ class ModeleService {
       await prisma.modele.delete({
         where: { id },
       });
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  static async getModelesByMarque(marqueId) {
-    try {
-      const modeles = await prisma.modele.findMany({
-        where: { marqueId },
-        include: {
-          marque: true,
-        },
-      });
-      return modeles.map((modele) => Modele.fromJSON(modele));
     } catch (error) {
       throw error;
     }

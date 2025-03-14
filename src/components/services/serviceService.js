@@ -4,11 +4,28 @@ const Service = require("../models/service");
 class ServiceService {
   static async createService(serviceData) {
     try {
+      if (
+        !serviceData.cout_base ||
+        typeof serviceData.cout_base !== "number" ||
+        serviceData.cout_base <= 0
+      ) {
+        throw new Error("Le coût de base doit être un nombre positif");
+      }
+      if (
+        !serviceData.temps_base ||
+        typeof serviceData.temps_base !== "number" ||
+        serviceData.temps_base <= 0
+      ) {
+        throw new Error("Le temps de base doit être un nombre positif");
+      }
+
       const service = await prisma.service.create({
         data: {
           titre: serviceData.titre,
           description: serviceData.description,
           icone: serviceData.icone,
+          cout_base: serviceData.cout_base,
+          temps_base: serviceData.temps_base,
         },
       });
       return Service.fromJSON(service);
@@ -87,12 +104,30 @@ class ServiceService {
 
   static async updateService(id, serviceData) {
     try {
+      // Validation des données pour la mise à jour
+      if (
+        serviceData.cout_base &&
+        (typeof serviceData.cout_base !== "number" ||
+          serviceData.cout_base <= 0)
+      ) {
+        throw new Error("Le coût de base doit être un nombre positif");
+      }
+      if (
+        serviceData.temps_base &&
+        (typeof serviceData.temps_base !== "number" ||
+          serviceData.temps_base <= 0)
+      ) {
+        throw new Error("Le temps de base doit être un nombre positif");
+      }
+
       const service = await prisma.service.update({
         where: { id },
         data: {
           titre: serviceData.titre,
           description: serviceData.description,
           icone: serviceData.icone,
+          cout_base: serviceData.cout_base,
+          temps_base: serviceData.temps_base,
         },
       });
 
