@@ -18,12 +18,66 @@ model User {
   isEmailVerified   Boolean  @default(false)
   verificationCode  String?
   verificationExpires DateTime?
+  demandes          DemandeService[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  titre       String
+  description String
+  icone       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {
   CLIENT
   MECANICIEN
   MANAGER
+}
+
+enum EtatVehicule {
+  NEUF
+  USE
+  TRES_USE
+}
+
+enum StatutDemande {
+  EN_ATTENTE
+  ACCEPTEE
+  REFUSEE
+  EN_COURS
+  TERMINEE
+}
+
+model Marque {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle String
+  modeles Modele[]
+}
+
+model Modele {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle  String
+  marqueId String   @db.ObjectId
+  marque   Marque   @relation(fields: [marqueId], references: [id])
+}
+
+model TypeVehicule {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle              String
+  coefficient_estimation Float
+  cout_moyen           Float
+  temps_moyen          Float
+}
+
+model DemandeService {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  id_personne   String        @db.ObjectId
+  vehicule      Json
+  dateCreation  DateTime      @default(now())
+  statut        StatutDemande @default(EN_ATTENTE)
+  user          User          @relation(fields: [id_personne], references: [id])
 } 

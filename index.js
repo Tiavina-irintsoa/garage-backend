@@ -41,6 +41,11 @@ const LoginController = require("./src/components/controllers/loginController");
 const ManagerController = require("./src/components/controllers/managerController");
 const VerificationController = require("./src/components/controllers/verificationController");
 const UserController = require("./src/components/controllers/userController");
+const ServiceController = require("./src/components/controllers/serviceController");
+const DemandeController = require("./src/components/controllers/demandeController");
+const MarqueController = require("./src/components/controllers/marqueController");
+const ModeleController = require("./src/components/controllers/modeleController");
+const TypeVehiculeController = require("./src/components/controllers/typeVehiculeController");
 
 // Middlewares
 const {
@@ -73,14 +78,62 @@ app.post(
 
 // Routes protégées
 app.get("/api/auth/users/:userId", authMiddleware, UserController.getUserById);
+app.get("/api/auth/users", authMiddleware, UserController.getAllUsers);
 
-// Route protégée exemple
-app.get("/api/protected", authMiddleware, (req, res) => {
-  res.json({
-    message: "Cette route est protégée",
-    user: req.user,
-  });
-});
+// Routes des services
+app.post("/api/services", authMiddleware, ServiceController.createService);
+app.get("/api/services", ServiceController.getAllServices);
+app.get("/api/services/all", ServiceController.getAllServicesWithoutPagination);
+app.get("/api/services/:id", ServiceController.getServiceById);
+app.put("/api/services/:id", authMiddleware, ServiceController.updateService);
+app.delete(
+  "/api/services/:id",
+  authMiddleware,
+  ServiceController.deleteService
+);
+
+// Routes des demandes de service
+app.post("/api/demandes", authMiddleware, DemandeController.createDemande);
+app.get("/api/demandes/:id", authMiddleware, DemandeController.getDemandeById);
+app.get(
+  "/api/demandes/user",
+  authMiddleware,
+  DemandeController.getDemandesByUser
+);
+
+// Routes des marques
+app.post("/api/marques", authMiddleware, MarqueController.createMarque);
+app.get("/api/marques", MarqueController.getAllMarques);
+app.get("/api/marques/:id", MarqueController.getMarqueById);
+app.put("/api/marques/:id", authMiddleware, MarqueController.updateMarque);
+app.delete("/api/marques/:id", authMiddleware, MarqueController.deleteMarque);
+
+// Routes des modèles
+app.post("/api/modeles", authMiddleware, ModeleController.createModele);
+app.get("/api/modeles", ModeleController.getAllModeles);
+app.get("/api/modeles/:id", ModeleController.getModeleById);
+app.get("/api/modeles/marque/:marqueId", ModeleController.getModelesByMarque);
+app.put("/api/modeles/:id", authMiddleware, ModeleController.updateModele);
+app.delete("/api/modeles/:id", authMiddleware, ModeleController.deleteModele);
+
+// Routes des types de véhicules
+app.post(
+  "/api/types-vehicules",
+  authMiddleware,
+  TypeVehiculeController.createTypeVehicule
+);
+app.get("/api/types-vehicules", TypeVehiculeController.getAllTypeVehicules);
+app.get("/api/types-vehicules/:id", TypeVehiculeController.getTypeVehiculeById);
+app.put(
+  "/api/types-vehicules/:id",
+  authMiddleware,
+  TypeVehiculeController.updateTypeVehicule
+);
+app.delete(
+  "/api/types-vehicules/:id",
+  authMiddleware,
+  TypeVehiculeController.deleteTypeVehicule
+);
 
 // Route de status
 app.get("/api/status", async (req, res) => {
