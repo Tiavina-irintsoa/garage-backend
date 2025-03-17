@@ -78,6 +78,14 @@ class ServiceService {
     try {
       const services = await prisma.service.findMany({
         orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          titre: true,
+          description: true,
+          icone: true,
+          cout_base: true,
+          temps_base: true,
+        },
       });
 
       return services.map((service) => Service.fromJSON(service));
