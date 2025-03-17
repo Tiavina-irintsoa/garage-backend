@@ -46,6 +46,7 @@ const DemandeController = require("./src/components/controllers/demandeControlle
 const MarqueController = require("./src/components/controllers/marqueController");
 const ModeleController = require("./src/components/controllers/modeleController");
 const TypeVehiculeController = require("./src/components/controllers/typeVehiculeController");
+const EstimationController = require("./src/components/controllers/estimationController");
 
 // Middlewares
 const {
@@ -58,9 +59,26 @@ const { checkRole } = require("./src/components/middlewares/roleMiddleware");
 const authMiddleware = require("./src/components/utils/authMiddleware");
 const errorHandler = require("./src/components/middlewares/errorMiddleware");
 const ResponseJson = require("./src/components/utils/ResponseJson");
+const UploadService = require("./src/components/services/uploadService");
+const upload = require("./src/components/middlewares/uploadMiddleware");
+const UploadController = require("./src/components/controllers/uploadController");
 
 // Database
 const prisma = require("./src/components/utils/prisma");
+
+// Initialisation de Cloudinary
+UploadService.initialize();
+
+// Création du dossier uploads s'il n'existe pas
+const fs = require("fs");
+
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+// Routes pour l'upload d'images
+app.post("/api/upload", upload.single("image"), UploadController.uploadImage);
+app.delete("/api/upload/:public_id", UploadController.deleteImage);
 
 // Routes d'authentification publiques
 app.post("/api/auth/register", registerValidation, RegisterController.register);
@@ -134,7 +152,13 @@ app.delete(
   authMiddleware,
   TypeVehiculeController.deleteTypeVehicule
 );
-app.get("/api/marques/:marqueId/modeles", MarqueController.getModelesByMarqueId);
+app.get(
+  "/api/marques/:marqueId/modeles",
+  MarqueController.getModelesByMarqueId
+);
+
+// Route pour obtenir les détails d'une estimation
+app.post("/api/estimations/details", EstimationController.getEstimationDetails);
 
 // Route de status
 app.get("/api/status", async (req, res) => {

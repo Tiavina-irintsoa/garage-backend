@@ -1,19 +1,25 @@
 class Service {
-  constructor(titre, description, icone) {
-    this.titre = titre;
-    this.description = description;
-    this.icone = icone;
+  constructor(data) {
+    this.id = data.id;
+    this.titre = data.titre;
+    this.description = data.description;
+    this.icone = data.icone;
+    this.cout_base = data.cout_base;
+    this.temps_base = data.temps_base;
   }
 
   static fromJSON(json) {
-    return new Service(json.titre, json.description, json.icone);
+    return new Service(json);
   }
 
   toJSON() {
     return {
+      id: this.id,
       titre: this.titre,
       description: this.description,
       icone: this.icone,
+      cout_base: this.cout_base,
+      temps_base: this.temps_base,
     };
   }
 }
