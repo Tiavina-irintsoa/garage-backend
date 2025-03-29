@@ -24,12 +24,55 @@ model User {
 }
 
 model Service {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  typeService   TypeService   @relation(fields: [typeServiceId], references: [id])
+  typeServiceId String        @db.ObjectId
+  mecaniciens   User[]          
+  taches        Tache[]
+  pieces        ServicePiece[]
+  tachesParDefaut String[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model TypeService {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   titre       String
   description String
   icone       String
   cout_base   Float
   temps_base  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Piece {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  reference   String   @unique
+  nom         String
+  description String
+  prix        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tache {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  intitule    String
+  date_termine DateTime?
+  statut      Boolean  @default(false)
+  mecanicien  User
+  serviceId   String   @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ServicePiece {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  service     Service  @relation(fields: [serviceId], references: [id])
+  piece       Piece    @relation(fields: [pieceId], references: [id])
+  quantite    Int
+  prix        Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -47,9 +90,9 @@ enum EtatVehicule {
 }
 
 enum StatutDemande {
-  EN_ATTENTE
-  ACCEPTEE
-  REFUSEE
+  ATTENTE_ASSIGNATION
+  ATTENTE_FACTURATION
+  PAYE
   EN_COURS
   TERMINEE
 }
@@ -79,12 +122,15 @@ model DemandeService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   id_personne   String        @db.ObjectId
   vehicule      Json
-  services      Json[]
+  services      Service[]
   estimation    Json
   description   String?
   date_rdv      DateTime     // Date du rendez-vous
   heure_rdv     String       // Heure du rendez-vous au format HH:mm
+  deadline      DateTime     // Date limite pour terminer le service
+  images        String[]     // Liste des liens d'images
   dateCreation  DateTime      @default(now())
-  statut        StatutDemande @default(EN_ATTENTE)
+  statut        StatutDemande @default(ATTENTE_ASSIGNATION)
   user          User          @relation(fields: [id_personne], references: [id])
+  reference_paiement  String
 }
