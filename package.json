@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "vercel-build": "npm install && npm prisma generate"
+    "vercel-build": "npm install && npx prisma generate"
   },
   "keywords": [],
   "author": "",
