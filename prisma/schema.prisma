@@ -1,0 +1,148 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  email             String   @unique
+  password          String
+  nom               String
+  prenom            String
+  role              Role     @default(CLIENT)
+  isEmailVerified   Boolean  @default(false)
+  verificationCode  String?
+  verificationExpires DateTime?
+  demandes          DemandeService[]
+  taches            Tache[]
+  detailServiceIds  String[] @db.ObjectId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model DetailService {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  serviceId     String        @db.ObjectId
+  service       Service       @relation(fields: [serviceId], references: [id])
+  mecaniciensIds String[]     @db.ObjectId
+  taches        Tache[]
+  pieces        ServicePiece[]
+  demandeIds    String[]      @db.ObjectId
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Service {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  titre       String
+  description String
+  icone       String
+  tachesParDefaut String[]
+  cout_base   Float
+  temps_base  Float
+  details     DetailService[]
+  pieces      ServicePiece[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Piece {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  reference   String   @unique
+  nom         String
+  description String
+  prix        Float
+  services    ServicePiece[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tache {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  intitule    String
+  date_termine DateTime?
+  statut      Boolean  @default(false)
+  mecanicienId String  @db.ObjectId
+  mecanicien  User     @relation(fields: [mecanicienId], references: [id])
+  detailServiceId String @db.ObjectId
+  detailService DetailService @relation(fields: [detailServiceId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ServicePiece {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceId   String   @db.ObjectId
+  pieceId     String   @db.ObjectId
+  detailServiceId String @db.ObjectId
+  service     Service  @relation(fields: [serviceId], references: [id])
+  piece       Piece    @relation(fields: [pieceId], references: [id])
+  detailService DetailService @relation(fields: [detailServiceId], references: [id])
+  quantite    Int
+  prix        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  CLIENT
+  MECANICIEN
+  MANAGER
+}
+
+enum EtatVehicule {
+  NEUF
+  USE
+  TRES_USE
+}
+
+enum StatutDemande {
+  ATTENTE_ASSIGNATION
+  ATTENTE_FACTURATION
+  PAYE
+  EN_COURS
+  TERMINEE
+}
+
+model Marque {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle String
+  modeles Modele[]
+}
+
+model Modele {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle  String
+  marqueId String   @db.ObjectId
+  marque   Marque   @relation(fields: [marqueId], references: [id])
+}
+
+model TypeVehicule {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  libelle              String
+  coefficient_estimation Float
+  cout_moyen           Float
+  temps_moyen          Float
+}
+
+model DemandeService {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  id_personne   String        @db.ObjectId
+  vehicule      Json
+  detailServiceIds String[]    @db.ObjectId
+  estimation    Json
+  description   String?
+  date_rdv      DateTime
+  heure_rdv     String
+  deadline      DateTime?
+  images        String[]
+  dateCreation  DateTime      @default(now())
+  statut        StatutDemande @default(ATTENTE_ASSIGNATION)
+  user          User          @relation(fields: [id_personne], references: [id])
+  reference_paiement  String
+}
