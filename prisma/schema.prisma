@@ -23,23 +23,23 @@ model User {
   updatedAt         DateTime @updatedAt
 }
 
-model Service {
+model DetailService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  typeService   TypeService   @relation(fields: [typeServiceId], references: [id])
-  typeServiceId String        @db.ObjectId
+  service   Service   @relation(fields: [typeServiceId], references: [id])
+  serviceId String        @db.ObjectId
   mecaniciens   User[]          
   taches        Tache[]
   pieces        ServicePiece[]
-  tachesParDefaut String[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
 
-model TypeService {
+model Service {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   titre       String
   description String
   icone       String
+  tachesParDefaut String[]
   cout_base   Float
   temps_base  Float
   createdAt   DateTime @default(now())
@@ -122,7 +122,7 @@ model DemandeService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   id_personne   String        @db.ObjectId
   vehicule      Json
-  services      Service[]
+  DetailService  DetailService[]
   estimation    Json
   description   String?
   date_rdv      DateTime     // Date du rendez-vous
