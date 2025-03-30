@@ -69,13 +69,6 @@ const prisma = require("./src/components/utils/prisma");
 // Initialisation de Cloudinary
 UploadService.initialize();
 
-// Création du dossier uploads s'il n'existe pas
-const fs = require("fs");
-
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
-
 // Routes pour l'upload d'images
 app.post("/api/upload", upload.single("image"), UploadController.uploadImage);
 app.delete("/api/upload/:public_id", UploadController.deleteImage);
