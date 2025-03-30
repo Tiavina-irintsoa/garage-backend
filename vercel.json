@@ -1,0 +1,10 @@
+{
+    "config": {
+      "version": 2
+    },
+    "source": ".",
+    "type": "node",
+    "routes": [
+      { "src": "/(.*)", "dest": "/" }
+    ]
+  }
