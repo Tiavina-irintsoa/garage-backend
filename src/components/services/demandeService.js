@@ -84,60 +84,60 @@ class DemandeServiceService {
   }
 
   static async createDemande(demandeData) {
-    return await prisma.$transaction(async (prismaClient) => {
-      try {
-        const user = await prismaClient.user.findUnique({
-          where: { id: demandeData.id_personne },
-        });
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: demandeData.id_personne },
+      });
 
-        if (!user || user.role !== "CLIENT") {
-          throw new Error(
-            "Seuls les clients peuvent créer des demandes de service"
-          );
-        }
-
-        // Validation de la date et de l'heure
-        if (!demandeData.date_rdv || !demandeData.heure_rdv) {
-          throw new Error(
-            "La date et l'heure du rendez-vous sont obligatoires"
-          );
-        }
-
-        this.validateDateTime(demandeData.date_rdv, demandeData.heure_rdv);
-
-        const { vehiculeData, typeVehicule } = await this.validateVehiculeData(
-          demandeData.vehicule,
-          prismaClient
+      if (!user || user.role !== "CLIENT") {
+        throw new Error(
+          "Seuls les clients peuvent créer des demandes de service"
         );
-
-        const services = await this.validateAndGetServices(
-          demandeData.liste_services,
-          prismaClient
-        );
-
-        const estimation = EstimationService.calculerEstimation(
-          services,
-          typeVehicule,
-          vehiculeData.etatVehicule
-        );
-
-        const demande = await prismaClient.demandeService.create({
-          data: {
-            id_personne: demandeData.id_personne,
-            vehicule: vehiculeData,
-            services: services.map((s) => ({ id: s.id, titre: s.titre })),
-            estimation: estimation,
-            description: demandeData.description || null,
-            date_rdv: new Date(demandeData.date_rdv),
-            heure_rdv: demandeData.heure_rdv,
-          },
-        });
-
-        return DemandeService.fromJSON(demande);
-      } catch (error) {
-        throw error;
       }
-    });
+
+      // Validation de la date et de l'heure
+      if (!demandeData.date_rdv || !demandeData.heure_rdv) {
+        throw new Error("La date et l'heure du rendez-vous sont obligatoires");
+      }
+
+      this.validateDateTime(demandeData.date_rdv, demandeData.heure_rdv);
+
+      const { vehiculeData, typeVehicule } = await this.validateVehiculeData(
+        demandeData.vehicule,
+        prisma
+      );
+
+      const services = await this.validateAndGetServices(
+        demandeData.liste_services,
+        prisma
+      );
+
+      const estimation = EstimationService.calculerEstimation(
+        services,
+        typeVehicule,
+        vehiculeData.etatVehicule
+      );
+
+      const demande = await prisma.demandeService.create({
+        data: {
+          id_personne: demandeData.id_personne,
+          vehicule: vehiculeData,
+          detailServiceIds: services.map((s) => s.id),
+          estimation: estimation,
+          description: demandeData.description || null,
+          date_rdv: new Date(demandeData.date_rdv),
+          heure_rdv: demandeData.heure_rdv,
+          deadline: new Date(demandeData.date_rdv),
+          reference_paiement: `REF-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 9)}`,
+        },
+      });
+
+      return DemandeService.fromJSON(demande);
+    } catch (error) {
+      throw error;
+    }
   }
 
   static async getDemandeById(id) {

@@ -19,17 +19,20 @@ model User {
   verificationCode  String?
   verificationExpires DateTime?
   demandes          DemandeService[]
+  taches            Tache[]
+  detailServiceIds  String[] @db.ObjectId
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
 
 model DetailService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  service   Service   @relation(fields: [typeServiceId], references: [id])
-  serviceId String        @db.ObjectId
-  mecaniciens   User[]          
+  serviceId     String        @db.ObjectId
+  service       Service       @relation(fields: [serviceId], references: [id])
+  mecaniciensIds String[]     @db.ObjectId
   taches        Tache[]
   pieces        ServicePiece[]
+  demandeIds    String[]      @db.ObjectId
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -42,6 +45,8 @@ model Service {
   tachesParDefaut String[]
   cout_base   Float
   temps_base  Float
+  details     DetailService[]
+  pieces      ServicePiece[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -52,6 +57,7 @@ model Piece {
   nom         String
   description String
   prix        Float
+  services    ServicePiece[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -61,16 +67,22 @@ model Tache {
   intitule    String
   date_termine DateTime?
   statut      Boolean  @default(false)
-  mecanicien  User
-  serviceId   String   @db.ObjectId
+  mecanicienId String  @db.ObjectId
+  mecanicien  User     @relation(fields: [mecanicienId], references: [id])
+  detailServiceId String @db.ObjectId
+  detailService DetailService @relation(fields: [detailServiceId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model ServicePiece {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceId   String   @db.ObjectId
+  pieceId     String   @db.ObjectId
+  detailServiceId String @db.ObjectId
   service     Service  @relation(fields: [serviceId], references: [id])
   piece       Piece    @relation(fields: [pieceId], references: [id])
+  detailService DetailService @relation(fields: [detailServiceId], references: [id])
   quantite    Int
   prix        Float
   createdAt   DateTime @default(now())
@@ -122,13 +134,13 @@ model DemandeService {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   id_personne   String        @db.ObjectId
   vehicule      Json
-  DetailService  DetailService[]
+  detailServiceIds String[]    @db.ObjectId
   estimation    Json
   description   String?
-  date_rdv      DateTime     // Date du rendez-vous
-  heure_rdv     String       // Heure du rendez-vous au format HH:mm
-  deadline      DateTime     // Date limite pour terminer le service
-  images        String[]     // Liste des liens d'images
+  date_rdv      DateTime
+  heure_rdv     String
+  deadline      DateTime?
+  images        String[]
   dateCreation  DateTime      @default(now())
   statut        StatutDemande @default(ATTENTE_ASSIGNATION)
   user          User          @relation(fields: [id_personne], references: [id])
