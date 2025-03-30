@@ -1,7 +1,15 @@
 {
-    "source": ".",
-    "type": "node",
+    "version": 2,
+    "builds": [
+      {
+        "src": "index.js",
+        "use": "@now/node"
+      }
+    ],
     "routes": [
-      { "src": "/(.*)", "dest": "/" }
+      {
+        "src": "/(.*)",
+        "dest": "index.js"
+      }
     ]
   }
