@@ -4,6 +4,7 @@ const ResponseJson = require("../utils/ResponseJson");
 class UploadController {
   static async uploadImage(req, res) {
     try {
+      console.log("req.file : ", req.file);
       if (!req.file) {
         return res
           .status(400)

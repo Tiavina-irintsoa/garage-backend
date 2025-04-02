@@ -128,6 +128,7 @@ class DemandeServiceService {
           date_rdv: new Date(demandeData.date_rdv),
           heure_rdv: demandeData.heure_rdv,
           deadline: new Date(demandeData.date_rdv),
+          photos: demandeData.photos || [],
           reference_paiement: `REF-${Date.now()}-${Math.random()
             .toString(36)
             .substr(2, 9)}`,

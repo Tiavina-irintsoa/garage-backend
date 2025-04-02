@@ -32,7 +32,6 @@ const corsOptions = {
 
 // Appliquer CORS avant tout autre middleware
 app.use(cors(corsOptions));
-app.use(express.json());
 require("dotenv").config();
 
 // Controllers
@@ -69,9 +68,19 @@ const prisma = require("./src/components/utils/prisma");
 // Initialisation de Cloudinary
 UploadService.initialize();
 
-// Routes pour l'upload d'images
-app.post("/api/upload", upload.single("image"), UploadController.uploadImage);
+// Routes pour l'upload d'images - IMPORTANT: Ces routes doivent être définies AVANT les middlewares de parsing JSON
+app.post("/api/upload", upload.single("image"),
+(req, res, next) => {
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+  console.log("File:", req.file);
+  next();
+}, UploadController.uploadImage);
 app.delete("/api/upload/:public_id", UploadController.deleteImage);
+
+// Middlewares de parsing JSON - IMPORTANT: Ces middlewares doivent être appliqués APRÈS les routes d'upload
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
 // Routes d'authentification publiques
 app.post("/api/auth/register", registerValidation, RegisterController.register);

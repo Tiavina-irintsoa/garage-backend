@@ -141,6 +141,7 @@ model DemandeService {
   heure_rdv     String
   deadline      DateTime?
   images        String[]
+  photos        String[]      // URLs des photos
   dateCreation  DateTime      @default(now())
   statut        StatutDemande @default(ATTENTE_ASSIGNATION)
   user          User          @relation(fields: [id_personne], references: [id])

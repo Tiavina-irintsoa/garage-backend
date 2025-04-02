@@ -11,6 +11,7 @@ class DemandeService {
     this.description = data.description;
     this.date_rdv = data.date_rdv;
     this.heure_rdv = data.heure_rdv;
+    this.photos = data.photos || [];
   }
 
   static fromJSON(json) {
@@ -19,6 +20,7 @@ class DemandeService {
 
   toJSON() {
     return {
+      id: this.id,
       id_personne: this.id_personne,
       vehicule: this.vehicule,
       dateCreation: this.dateCreation,
@@ -28,6 +30,7 @@ class DemandeService {
       description: this.description,
       date_rdv: this.date_rdv,
       heure_rdv: this.heure_rdv,
+      photos: this.photos,
     };
   }
 }

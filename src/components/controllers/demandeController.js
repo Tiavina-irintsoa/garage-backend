@@ -23,6 +23,7 @@ class DemandeController {
         description: req.body.description,
         date_rdv: req.body.date_rdv,
         heure_rdv: req.body.heure_rdv,
+        photos: req.body.photos || [],
       };
 
       const demande = await DemandeServiceService.createDemande(demandeData);
@@ -39,6 +40,7 @@ class DemandeController {
               dateCreation: demande.dateCreation,
               date_rdv: demande.date_rdv,
               heure_rdv: demande.heure_rdv,
+              photos: demande.photos,
             },
           },
           201
@@ -63,6 +65,9 @@ class DemandeController {
             statut: demande.statut,
             dateCreation: demande.dateCreation,
             client: demande.user,
+            photos: demande.photos || [],
+            date_rdv: demande.date_rdv,
+            heure_rdv: demande.heure_rdv,
           },
         })
       );
@@ -93,6 +98,7 @@ class DemandeController {
             dateCreation: demande.dateCreation,
             date_rdv: demande.date_rdv,
             heure_rdv: demande.heure_rdv,
+            photos: demande.photos || [],
           })),
         })
       );
