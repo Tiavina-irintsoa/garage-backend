@@ -3,6 +3,7 @@ const DemandeService = require("../models/demandeService");
 const ModeleService = require("./modeleService");
 const ServiceService = require("./serviceService");
 const EstimationService = require("./estimationService");
+const { PrismaClient, StatutDemande } = require("@prisma/client");
 
 class DemandeServiceService {
   static validateDateTime(date_rdv, heure_rdv) {
@@ -178,6 +179,105 @@ class DemandeServiceService {
     } catch (error) {
       throw error;
     }
+  }
+
+  static async getDemandesByStatus(status) {
+    // Vérifier si le statut est valide
+    if (!Object.values(StatutDemande).includes(status)) {
+      throw new Error("Statut invalide");
+    }
+
+    const demandes = await prisma.demandeService.findMany({
+      where: {
+        statut: status,
+      },
+      orderBy: {
+        deadline: "asc",
+      },
+      select: {
+        id: true,
+        deadline: true,
+        date_rdv: true,
+        heure_rdv: true,
+        vehicule: true,
+        description: true,
+        user: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            email: true,
+          },
+        },
+        detailServiceIds: true,
+        estimation: true,
+        images: true,
+        reference_paiement: true,
+      },
+    });
+
+    return demandes;
+  }
+
+  static async getDemandeDetails(id) {
+    const demande = await prisma.demandeService.findFirst({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!demande) {
+      throw new Error("Demande non trouvée");
+    }
+
+    // Récupérer les détails des services
+    const services = await prisma.service.findMany({
+      where: {
+        id: {
+          in: demande.detailServiceIds,
+        },
+      },
+      include: {
+        pieces: {
+          include: {
+            piece: true,
+          },
+        },
+      },
+    });
+
+    // Récupérer les tâches associées
+    const taches = await prisma.tache.findMany({
+      where: {
+        detailServiceId: {
+          in: demande.detailServiceIds,
+        },
+      },
+      include: {
+        mecanicien: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return {
+      ...demande,
+      services,
+      taches,
+    };
   }
 }
 
