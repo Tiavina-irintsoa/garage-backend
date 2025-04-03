@@ -46,6 +46,8 @@ const MarqueController = require("./src/components/controllers/marqueController"
 const ModeleController = require("./src/components/controllers/modeleController");
 const TypeVehiculeController = require("./src/components/controllers/typeVehiculeController");
 const EstimationController = require("./src/components/controllers/estimationController");
+const PieceController = require("./src/components/controllers/pieceController");
+const FacturationController = require("./src/components/controllers/facturationController");
 
 // Middlewares
 const {
@@ -69,13 +71,17 @@ const prisma = require("./src/components/utils/prisma");
 UploadService.initialize();
 
 // Routes pour l'upload d'images - IMPORTANT: Ces routes doivent être définies AVANT les middlewares de parsing JSON
-app.post("/api/upload", upload.single("image"),
-(req, res, next) => {
-  console.log("Headers:", req.headers);
-  console.log("Body:", req.body);
-  console.log("File:", req.file);
-  next();
-}, UploadController.uploadImage);
+app.post(
+  "/api/upload",
+  upload.single("image"),
+  (req, res, next) => {
+    console.log("Headers:", req.headers);
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+    next();
+  },
+  UploadController.uploadImage
+);
 app.delete("/api/upload/:public_id", UploadController.deleteImage);
 
 // Middlewares de parsing JSON - IMPORTANT: Ces middlewares doivent être appliqués APRÈS les routes d'upload
@@ -122,6 +128,18 @@ app.get(
   DemandeController.getDemandesByUser
 );
 
+// Routes de facturation
+app.post(
+  "/api/demandes/:id/facture",
+  authMiddleware,
+  FacturationController.createFacture
+);
+app.get(
+  "/api/demandes/:id/facture",
+  authMiddleware,
+  FacturationController.getFacture
+);
+
 // Routes des marques
 app.post("/api/marques", authMiddleware, MarqueController.createMarque);
 app.get("/api/marques", MarqueController.getAllMarques);
@@ -159,6 +177,13 @@ app.get(
   "/api/marques/:marqueId/modeles",
   MarqueController.getModelesByMarqueId
 );
+
+// Routes des pièces
+app.post("/api/pieces", authMiddleware, PieceController.createPiece);
+app.get("/api/pieces", PieceController.getAllPieces);
+app.get("/api/pieces/:id", authMiddleware, PieceController.getPieceById);
+app.put("/api/pieces/:id", authMiddleware, PieceController.updatePiece);
+app.delete("/api/pieces/:id", authMiddleware, PieceController.deletePiece);
 
 // Route pour obtenir les détails d'une estimation
 app.post("/api/estimations/details", EstimationController.getEstimationDetails);
