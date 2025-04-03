@@ -146,4 +146,9 @@ model DemandeService {
   statut        StatutDemande @default(ATTENTE_ASSIGNATION)
   user          User          @relation(fields: [id_personne], references: [id])
   reference_paiement  String
+  // Champs pour la facturation
+  pieces_facture Json?        // Liste des pièces avec leurs détails
+  montant_pieces Float?       // Somme totale des pièces
+  montant_total  Float?       // Estimation + montant des pièces
+  date_facturation DateTime?  // Date de création de la facture
 }
