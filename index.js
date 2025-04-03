@@ -48,6 +48,7 @@ const TypeVehiculeController = require("./src/components/controllers/typeVehicul
 const EstimationController = require("./src/components/controllers/estimationController");
 const PieceController = require("./src/components/controllers/pieceController");
 const FacturationController = require("./src/components/controllers/facturationController");
+const DashboardController = require("./src/components/controllers/dashboardController");
 
 // Middlewares
 const {
@@ -187,6 +188,23 @@ app.delete("/api/pieces/:id", authMiddleware, PieceController.deletePiece);
 
 // Route pour obtenir les détails d'une estimation
 app.post("/api/estimations/details", EstimationController.getEstimationDetails);
+
+// Routes du dashboard
+app.get(
+  "/api/dashboard/inscriptions",
+  authMiddleware,
+  DashboardController.getInscriptionsParMois
+);
+app.get(
+  "/api/dashboard/chiffre-affaire",
+  authMiddleware,
+  DashboardController.getChiffreAffaireParMois
+);
+app.get(
+  "/api/dashboard/services-plus-demandes",
+  authMiddleware,
+  DashboardController.getServicesPlusDemandes
+);
 
 // Route de status
 app.get("/api/status", async (req, res) => {
