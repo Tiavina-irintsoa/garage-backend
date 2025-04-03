@@ -121,38 +121,42 @@ class DashboardService {
         },
       });
 
-      // Compter le nombre d'occurrences de chaque service
-      const serviceCounts = {};
-      demandes.forEach((demande) => {
-        demande.detailServiceIds.forEach((serviceId) => {
-          serviceCounts[serviceId] = (serviceCounts[serviceId] || 0) + 1;
-        });
-      });
-
-      // Récupérer les détails des services
+      // Récupérer tous les services
       const services = await prisma.service.findMany({
-        where: {
-          id: {
-            in: Object.keys(serviceCounts),
-          },
-        },
         select: {
           id: true,
           titre: true,
         },
       });
 
-      // Créer un tableau avec les services et leur nombre d'occurrences
+      // Compter le nombre total d'utilisations de services
+      let totalUtilisations = 0;
+      const serviceCounts = {};
+
+      demandes.forEach((demande) => {
+        demande.detailServiceIds.forEach((serviceId) => {
+          serviceCounts[serviceId] = (serviceCounts[serviceId] || 0) + 1;
+          totalUtilisations++;
+        });
+      });
+
+      // Créer un tableau avec tous les services et leur pourcentage d'utilisation
       const resultat = services.map((service) => ({
         id: service.id,
         titre: service.titre,
-        nombreDemandes: serviceCounts[service.id],
+        pourcentage:
+          totalUtilisations > 0
+            ? (
+                ((serviceCounts[service.id] || 0) / totalUtilisations) *
+                100
+              ).toFixed(2)
+            : "0.00",
       }));
 
-      // Trier par nombre de demandes (décroissant) et prendre les 5 premiers
-      return resultat
-        .sort((a, b) => b.nombreDemandes - a.nombreDemandes)
-        .slice(0, 5);
+      // Trier par pourcentage (décroissant)
+      return resultat.sort(
+        (a, b) => parseFloat(b.pourcentage) - parseFloat(a.pourcentage)
+      );
     } catch (error) {
       throw error;
     }
