@@ -114,7 +114,8 @@ app.delete(
 
 // Routes des demandes de service
 app.post("/api/demandes", authMiddleware, DemandeController.createDemande);
-// app.get("/api/demandes/:id", authMiddleware, DemandeController.getDemandeById);
+app.get("/api/demandes/status/:status", DemandeController.getDemandesByStatus);
+app.get("/api/demandes/:id", DemandeController.getDemandeDetails);
 app.get(
   "/api/demandes/user",
   authMiddleware,

@@ -1,5 +1,6 @@
 const DemandeServiceService = require("../services/demandeService");
 const ResponseJson = require("../utils/ResponseJson");
+const DemandeService = require("../services/demandeService");
 
 class DemandeController {
   static async createDemande(req, res) {
@@ -103,6 +104,44 @@ class DemandeController {
         })
       );
     } catch (error) {
+      return res.status(500).json(ResponseJson.error(error.message, 500));
+    }
+  }
+
+  static async getDemandesByStatus(req, res) {
+    try {
+      const { status } = req.params;
+      const demandes = await DemandeService.getDemandesByStatus(status);
+      res.json(demandes);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des demandes:", error);
+      if (error.message === "Statut invalide") {
+        return res.status(400).json({
+          error: "Statut invalide",
+          statutsValides: Object.values(StatutDemande),
+        });
+      }
+      res.status(500).json({
+        error: "Erreur lors de la récupération des demandes",
+        details: error.message,
+      });
+    }
+  }
+
+  static async getDemandeDetails(req, res) {
+    try {
+      const { id } = req.params;
+      const demandeDetails = await DemandeServiceService.getDemandeDetails(id);
+
+      return res.status(200).json(
+        ResponseJson.success({
+          demande: demandeDetails,
+        })
+      );
+    } catch (error) {
+      if (error.message === "Demande non trouvée") {
+        return res.status(404).json(ResponseJson.error(error.message, 404));
+      }
       return res.status(500).json(ResponseJson.error(error.message, 500));
     }
   }
