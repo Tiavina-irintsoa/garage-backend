@@ -95,6 +95,68 @@ class DashboardService {
       throw error;
     }
   }
+
+  static async getServicesPlusDemandes(annee) {
+    try {
+      // Vérifier que l'année est valide
+      if (
+        !annee ||
+        isNaN(annee) ||
+        annee < 2000 ||
+        annee > new Date().getFullYear()
+      ) {
+        throw new Error("Année invalide");
+      }
+
+      // Récupérer toutes les demandes de l'année
+      const demandes = await prisma.demandeService.findMany({
+        where: {
+          dateCreation: {
+            gte: new Date(annee, 0, 1),
+            lt: new Date(annee + 1, 0, 1),
+          },
+        },
+        select: {
+          detailServiceIds: true,
+        },
+      });
+
+      // Compter le nombre d'occurrences de chaque service
+      const serviceCounts = {};
+      demandes.forEach((demande) => {
+        demande.detailServiceIds.forEach((serviceId) => {
+          serviceCounts[serviceId] = (serviceCounts[serviceId] || 0) + 1;
+        });
+      });
+
+      // Récupérer les détails des services
+      const services = await prisma.service.findMany({
+        where: {
+          id: {
+            in: Object.keys(serviceCounts),
+          },
+        },
+        select: {
+          id: true,
+          titre: true,
+        },
+      });
+
+      // Créer un tableau avec les services et leur nombre d'occurrences
+      const resultat = services.map((service) => ({
+        id: service.id,
+        titre: service.titre,
+        nombreDemandes: serviceCounts[service.id],
+      }));
+
+      // Trier par nombre de demandes (décroissant) et prendre les 5 premiers
+      return resultat
+        .sort((a, b) => b.nombreDemandes - a.nombreDemandes)
+        .slice(0, 5);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = DashboardService;

@@ -200,6 +200,11 @@ app.get(
   authMiddleware,
   DashboardController.getChiffreAffaireParMois
 );
+app.get(
+  "/api/dashboard/services-plus-demandes",
+  authMiddleware,
+  DashboardController.getServicesPlusDemandes
+);
 
 // Route de status
 app.get("/api/status", async (req, res) => {

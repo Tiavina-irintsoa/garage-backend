@@ -23,6 +23,16 @@ class DashboardController {
       return res.status(500).json(ResponseJson.error(error.message));
     }
   }
+
+  static async getServicesPlusDemandes(req, res) {
+    try {
+      const annee = parseInt(req.query.annee) || new Date().getFullYear();
+      const services = await DashboardService.getServicesPlusDemandes(annee);
+      return res.json(ResponseJson.success({ services }));
+    } catch (error) {
+      return res.status(500).json(ResponseJson.error(error.message));
+    }
+  }
 }
 
 module.exports = DashboardController;
