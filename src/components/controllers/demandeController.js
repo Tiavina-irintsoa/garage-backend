@@ -59,16 +59,23 @@ class DemandeController {
         ResponseJson.success({
           demande: {
             id: demande.id,
-            vehicule: demande.vehicule,
-            services: demande.services,
-            estimation: demande.estimation,
-            description: demande.description,
-            statut: demande.statut,
-            dateCreation: demande.dateCreation,
-            client: demande.user,
-            photos: demande.photos || [],
+            id_personne: demande.id_personne,
+            vehicule: demande.vehicule || null,
+            detailServiceIds: demande.detailServiceIds || [],
+            estimation: demande.estimation || null,
+            description: demande.description || null,
             date_rdv: demande.date_rdv,
             heure_rdv: demande.heure_rdv,
+            deadline: demande.deadline || null,
+            dateCreation: demande.dateCreation,
+            statut: demande.statut,
+            reference_paiement: demande.reference_paiement,
+            pieces_facture: demande.pieces_facture || [],
+            montant_pieces: demande.montant_pieces || null,
+            montant_total: demande.montant_total || null,
+            date_facturation: demande.date_facturation || null,
+            photos: demande.photos || [],
+            client: demande.user,
           },
         })
       );
@@ -112,19 +119,41 @@ class DemandeController {
     try {
       const { status } = req.params;
       const demandes = await DemandeService.getDemandesByStatus(status);
-      res.json(demandes);
+
+      return res.status(200).json(
+        ResponseJson.success({
+          demandes: demandes.map((demande) => ({
+            id: demande.id,
+            id_personne: demande.id_personne,
+            vehicule: demande.vehicule || null,
+            detailServiceIds: demande.detailServiceIds || [],
+            estimation: demande.estimation || null,
+            description: demande.description || null,
+            date_rdv: demande.date_rdv,
+            heure_rdv: demande.heure_rdv,
+            deadline: demande.deadline || null,
+            dateCreation: demande.dateCreation,
+            statut: demande.statut,
+            reference_paiement: demande.reference_paiement,
+            pieces_facture: demande.pieces_facture || [],
+            montant_pieces: demande.montant_pieces || null,
+            montant_total: demande.montant_total || null,
+            date_facturation: demande.date_facturation || null,
+            photos: demande.photos || [],
+            client: demande.user,
+          })),
+        })
+      );
     } catch (error) {
       console.error("Erreur lors de la récupération des demandes:", error);
       if (error.message === "Statut invalide") {
-        return res.status(400).json({
-          error: "Statut invalide",
-          statutsValides: Object.values(StatutDemande),
-        });
+        return res.status(400).json(ResponseJson.error("Statut invalide", 400));
       }
-      res.status(500).json({
-        error: "Erreur lors de la récupération des demandes",
-        details: error.message,
-      });
+      return res
+        .status(500)
+        .json(
+          ResponseJson.error("Erreur lors de la récupération des demandes", 500)
+        );
     }
   }
 
@@ -135,7 +164,27 @@ class DemandeController {
 
       return res.status(200).json(
         ResponseJson.success({
-          demande: demandeDetails,
+          demande: {
+            id: demandeDetails.id,
+            id_personne: demandeDetails.id_personne,
+            vehicule: demandeDetails.vehicule || null,
+            detailServiceIds: demandeDetails.detailServiceIds || [],
+            estimation: demandeDetails.estimation || null,
+            description: demandeDetails.description || null,
+            date_rdv: demandeDetails.date_rdv,
+            heure_rdv: demandeDetails.heure_rdv,
+            deadline: demandeDetails.deadline || null,
+            dateCreation: demandeDetails.dateCreation,
+            statut: demandeDetails.statut,
+            reference_paiement: demandeDetails.reference_paiement,
+            pieces_facture: demandeDetails.pieces_facture || [],
+            montant_pieces: demandeDetails.montant_pieces || null,
+            montant_total: demandeDetails.montant_total || null,
+            date_facturation: demandeDetails.date_facturation || null,
+            photos: demandeDetails.photos || [],
+            client: demandeDetails.user,
+            services: demandeDetails.services,
+          },
         })
       );
     } catch (error) {
