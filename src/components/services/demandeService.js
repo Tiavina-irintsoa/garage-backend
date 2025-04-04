@@ -213,6 +213,9 @@ class DemandeServiceService {
         estimation: true,
         images: true,
         reference_paiement: true,
+        montant_total: true,
+        montant_pieces: true,
+        date_facturation: true,
       },
     });
 
@@ -222,13 +225,31 @@ class DemandeServiceService {
   static async getDemandeDetails(id) {
     const demande = await prisma.demandeService.findFirst({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        id_personne: true,
+        vehicule: true,
+        detailServiceIds: true,
+        estimation: true,
+        description: true,
+        date_rdv: true,
+        heure_rdv: true,
+        deadline: true,
+        dateCreation: true,
+        statut: true,
+        reference_paiement: true,
+        pieces_facture: true,
+        montant_pieces: true,
+        montant_total: true,
+        date_facturation: true,
+        photos: true,
         user: {
           select: {
             id: true,
             nom: true,
             prenom: true,
             email: true,
+            telephone: true,
           },
         },
       },
@@ -238,45 +259,55 @@ class DemandeServiceService {
       throw new Error("Demande non trouvée");
     }
 
-    // Récupérer les détails des services
+    // Récupérer les services associés
     const services = await prisma.service.findMany({
       where: {
         id: {
           in: demande.detailServiceIds,
         },
       },
-      include: {
-        pieces: {
-          include: {
-            piece: true,
-          },
-        },
+      select: {
+        id: true,
+        titre: true,
+        description: true,
+        cout_base: true,
+        temps_base: true,
       },
     });
 
-    // Récupérer les tâches associées
-    const taches = await prisma.tache.findMany({
+    // Récupérer les informations complètes des pièces
+    const piecesIds = demande.pieces_facture?.map((piece) => piece.id) || [];
+    const pieces = await prisma.piece.findMany({
       where: {
-        detailServiceId: {
-          in: demande.detailServiceIds,
+        id: {
+          in: piecesIds,
         },
       },
-      include: {
-        mecanicien: {
-          select: {
-            id: true,
-            nom: true,
-            prenom: true,
-            email: true,
-          },
-        },
+      select: {
+        id: true,
+        nom: true,
+        reference: true,
+        description: true,
+        prix: true,
       },
     });
+
+    // Combiner les informations des pièces avec leurs quantités
+    const piecesCompletes =
+      demande.pieces_facture?.map((pieceFacture) => {
+        const pieceInfo = pieces.find((p) => p.id === pieceFacture.id);
+        return {
+          ...pieceFacture,
+          nom: pieceInfo?.nom || "",
+          reference: pieceInfo?.reference || "",
+          description: pieceInfo?.description || "",
+        };
+      }) || [];
 
     return {
       ...demande,
-      services,
-      taches,
+      services: services,
+      pieces_facture: piecesCompletes,
     };
   }
 }

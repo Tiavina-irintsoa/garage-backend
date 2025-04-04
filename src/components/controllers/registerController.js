@@ -39,6 +39,7 @@ class RegisterController {
         password: req.body.password,
         nom: req.body.nom,
         prenom: req.body.prenom,
+        telephone: req.body.telephone || null,
         role: role,
       };
 
